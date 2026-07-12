@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#1a2b6d" />
+    <title>Hamster Orbit: Sky Sprint</title>
+    <style>
+      /* Inline critical loading styles so the loading frame renders before any bundle parses */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #16205c;
+        font-family: system-ui, sans-serif;
+      }
+      #boot-loading {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: radial-gradient(ellipse at 50% 35%, #2c46a8 0%, #16205c 70%);
+        z-index: 200;
+        transition: opacity 0.35s ease;
+      }
+      #boot-loading.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .boot-logo {
+        color: #fff;
+        font-weight: 900;
+        font-size: clamp(22px, 6vw, 40px);
+        letter-spacing: 0.06em;
+        text-align: center;
+        text-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+        line-height: 1.15;
+        padding: 0 16px;
+      }
+      .boot-logo span {
+        display: block;
+        font-size: 0.5em;
+        font-weight: 700;
+        color: #ffd75e;
+        letter-spacing: 0.35em;
+        margin-top: 4px;
+      }
+      .boot-ball {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        border: 4px solid rgba(255, 255, 255, 0.85);
+        border-top-color: #ffd75e;
+        animation: boot-spin 0.9s linear infinite;
+        box-shadow: 0 0 24px rgba(120, 170, 255, 0.4);
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .boot-label {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 13px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+    </style>
+    <!-- YouTube Playables SDK must load before any game code -->
+    <script src="https://www.youtube.com/game_api/v1"></script>
+  </head>
+  <body>
+    <div id="boot-loading" aria-label="Loading">
+      <div class="boot-logo">HAMSTER ORBIT<span>SKY SPRINT</span></div>
+      <div class="boot-ball"></div>
+      <div class="boot-label" id="boot-label">Loading</div>
+    </div>
+    <canvas id="game-canvas"></canvas>
+    <div id="ui-root"></div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
