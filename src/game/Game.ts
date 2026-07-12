@@ -46,6 +46,7 @@ interface RunState {
   respawnTimer: number;
   respawnTeleported: boolean;
   finishTimer: number;
+  resultsShown: boolean;
   failTimer: number;
   warned10: boolean;
   warned5: boolean;
@@ -68,6 +69,7 @@ function freshRun(): RunState {
     respawnTimer: 0,
     respawnTeleported: false,
     finishTimer: 0,
+    resultsShown: false,
     failTimer: 0,
     warned10: false,
     warned5: false,
@@ -736,6 +738,10 @@ export class Game {
   // --------------------------------------------------------------- results
 
   private finishLevel(): void {
+    // guard: updateFinish keeps ticking in LEVEL_COMPLETE, so results must be
+    // computed and shown exactly once (never rebuilt per frame)
+    if (this.run.resultsShown) return;
+    this.run.resultsShown = true;
     const def = this.level!.def;
     const runStats: RunStats = {
       timeMs: Math.round(this.run.elapsedMs),
@@ -992,7 +998,7 @@ export class Game {
     this.player.update(dt, 0, 0, this.followCam.yaw);
     this.level?.update(dt, this.run.elapsedMs / 1000);
     this.syncVisuals(dt);
-    if (this.run.finishTimer <= 0 && this.states.current === GameState.LEVEL_COMPLETE) {
+    if (this.run.finishTimer <= 0 && !this.run.resultsShown) {
       this.finishLevel();
     }
   }
