@@ -3,3 +3,5 @@ dist/
 *.log
 .DS_Store
 coverage/
+# YouTube Playable upload package (build artifact)
+*.zip
