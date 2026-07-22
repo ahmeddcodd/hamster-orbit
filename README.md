@@ -2,7 +2,7 @@
 
 A premium 3D arcade roll-and-race obstacle platformer built as a **YouTube Playable**. Guide a
 plucky hamster inside a transparent ball across floating sky-high checkerboard courses: build
-momentum, balance on narrow bridges, ride loops and magnetic walls, dodge toy-like machinery,
+momentum, balance on narrow bridges, ride magnetic walls, dodge toy-like machinery,
 collect golden sunflower seeds, and beat the clock across a 10-level campaign plus an endless
 **Sky Sprint** bonus mode.
 
@@ -39,7 +39,7 @@ collect golden sunflower seeds, and beat the clock across a 10-level campaign pl
 | 5 | Wobble Workshop | Seesaws, tilting platforms, balance |
 | 6 | Neon Switchway | Flicker-bridge timing, speed tubes, route reading |
 | 7 | Crystal Glide | Low-traction glass, early braking, breakable walls |
-| 8 | Gravity Garden | Magnetic wall-rides, local gravity, the loop |
+| 8 | Gravity Garden | Magnetic wall-rides, local gravity, speed boosts |
 | 9 | Clockwork Core | Crushers, saws, hammers, mechanical timing |
 | 10 | Orbit Mastery | Final exam: everything combined + mega launch |
 
@@ -90,7 +90,7 @@ src/
   rendering/              renderer/quality tiers, palette materials, environment, post FX
   audio/                  fully synthesized SFX + generative music (no audio files)
   effects/                pooled particles, ring pulses, floating score text
-  hazards/                15 hazard types behind one deterministic interface
+  hazards/                14 hazard types behind one deterministic interface
   levels/                 data-driven definitions (L1-L10), builder, validator, mesh factories
   game/                   Game orchestrator + endless Sprint generator
   gameplay/               timer/score/stars/progression pure logic (unit-tested)
@@ -173,8 +173,12 @@ latest official YouTube Playables requirements and tooling.
 ## Known limitations
 
 - Music is generative/synthesized — pleasant but simple; swap in composed loops for more character.
-- The magnetic loop/wall-ride are arcade approximations (radial gravity fields), tuned for fun
+- The magnetic wall-ride is an arcade approximation (radial gravity field), tuned for fun
   rather than physical accuracy.
+- A full vertical loop-the-loop was cut: a closed ring standing on the floor is geometrically
+  unenterable without a dedicated banked entry ramp (the ring's lower arc blocks the approach),
+  and it could soft-lock the ball. Levels 8 and 10 use the magnetic wall-ride and boost pads
+  instead. Re-adding it would need a tangential entry ramp feeding the ring's inner surface.
 - Camera yaw follows velocity; on tight S-curves it can lag a fast, sloppy line.
 - English strings only (structure supports adding languages via the platform language API).
 

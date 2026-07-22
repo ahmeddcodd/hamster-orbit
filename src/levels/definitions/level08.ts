@@ -63,8 +63,7 @@ export const level08: LevelDefinition = {
   ],
   hazards: [
     { t: 'magnetwall', id: 'wallrun', c: [-22, -1.2, -30], r: 8, h: 8, a0: Math.PI / 2, a1: Math.PI - 0.16 },
-    { t: 'boost', id: 'loopBoost', p: [-30, -1, -48], yaw: YAW_NEG_Z, power: 13 },
-    { t: 'loop', id: 'bigLoop', c: [-30, 3.4, -55.5], r: 4.4, w: 3.4, yaw: YAW_NEG_Z },
+    { t: 'boost', id: 'speedRun', p: [-30, -1, -48], yaw: YAW_NEG_Z, power: 13 },
   ],
   arrows: [
     arrow(0, -3, YAW_NEG_Z, 0, 1.2),
@@ -77,8 +76,8 @@ export const level08: LevelDefinition = {
   ],
   tutorials: [
     { text: 'Magnetic walls hold you — keep speed', p: [-14.5, 0, -21], radius: 5 },
-    { text: 'Enter fast to stay on the loop!', p: [-30, -1, -46], radius: 4 },
-    { text: 'Scared of loops? Take the side lane', p: [-33, -1, -50], radius: 3 },
+    { text: 'Boost pads launch you forward', p: [-30, -1, -46], radius: 4 },
+    { text: 'The west lane is the fast line', p: [-33, -1, -50], radius: 3 },
   ],
-  shortcuts: [{ id: 'loopRide', p: [-30, 7, -55.5], s: [4, 3, 5] }],
+  shortcuts: [{ id: 'outerLane', p: [-37, 0, -55.5], s: [4, 4, 8] }],
 };

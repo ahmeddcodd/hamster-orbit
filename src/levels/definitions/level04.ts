@@ -44,7 +44,6 @@ export const level04: LevelDefinition = {
     // windmill platform (extended to meet the fan corridor)
     plat(0, -59.5, 11, 14, 0),
     { t: 'deco', kind: 'tower', p: [8.5, -1.5, -60.5], s: [4, 18, 4] },
-    { t: 'deco', kind: 'ring', p: [8.5, 6, -60.5], s: [2.2, 0.35, 0] },
     // moving-bridge crossing (slight step-downs make landings forgiving)
     plat(0, -67.5, 7, 4, 0),
     plat(0, -78.5, 7, 5, -0.8),

@@ -55,8 +55,6 @@ export const level06: LevelDefinition = {
     plat(9, -83.5, 4, 4, -3),
     // converge + CP2 (wide enough to catch both the zigzag and the shortcut)
     plat(1, -87.5, 18, 8, -3),
-    // giant loop-shaped landmark over the final descent
-    { t: 'deco', kind: 'ring', p: [0, 1.5, -96], s: [6.5, 0.8, 0] },
     rampZ(0, -92, -100, 6.5, -3, -5),
     plat(0, -106, 12, 12, -5),
     { t: 'deco', kind: 'arch', p: [0, -1.5, -101], s: [8, 4, 0] },

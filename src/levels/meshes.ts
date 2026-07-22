@@ -108,7 +108,7 @@ export function seedMesh(mats: MaterialLibrary): THREE.Mesh {
 
 /** Decorative tower / pillar / arch / ring landmark shapes. */
 export function decoMesh(
-  kind: 'tower' | 'arch' | 'pillar' | 'ring' | 'flag',
+  kind: 'tower' | 'arch' | 'pillar' | 'flag',
   s: [number, number, number],
   mats: MaterialLibrary
 ): THREE.Object3D {
@@ -143,12 +143,6 @@ export function decoMesh(
       l2.position.y = -s[1] / 2;
       g.add(l1, l2, top);
       return g;
-    }
-    case 'ring': {
-      const geo = new THREE.TorusGeometry(s[0], s[1] || 0.4, 10, 40);
-      const m = new THREE.Mesh(geo, mats.accent);
-      m.castShadow = true;
-      return m;
     }
     case 'flag':
       return flagMesh(mats, s[1] || 2.2);

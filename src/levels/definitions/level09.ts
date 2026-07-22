@@ -63,7 +63,6 @@ export const level09: LevelDefinition = {
     // clock-tower finish
     plat(0, -111, 12, 12, 0),
     { t: 'deco', kind: 'tower', p: [7.5, -1, -111], s: [5, 24, 5] },
-    { t: 'deco', kind: 'ring', p: [7.5, 12.5, -110.9], s: [2.6, 0.4, 0] },
   ],
   hazards: [
     { t: 'crusher', id: 'tut', p: [0, 0, -12], s: [4, 2, 3], rise: 4, period: 4.6, offset: 0.8 },

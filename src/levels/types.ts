@@ -43,7 +43,7 @@ export type GeoPiece =
       surface?: Surface;
     }
   | { t: 'rail'; from: V3; to: V3; h?: number }
-  | { t: 'deco'; kind: 'tower' | 'arch' | 'pillar' | 'ring' | 'flag'; p: V3; s?: V3; rotY?: number };
+  | { t: 'deco'; kind: 'tower' | 'arch' | 'pillar' | 'flag'; p: V3; s?: V3; rotY?: number };
 
 export interface ArrowMarker {
   p: V3;
@@ -85,7 +85,6 @@ export type HazardDef =
   | { t: 'launch'; id: string; p: V3; yaw: number; s?: V3; power?: number; upPower?: number }
   | { t: 'tube'; id: string; points: V3[]; r?: number; speed?: number }
   | { t: 'glass'; id: string; p: V3; s: V3; breakSpeed?: number }
-  | { t: 'loop'; id: string; c: V3; r: number; w?: number; yaw: number }
   | { t: 'magnetwall'; id: string; c: V3; r: number; h: number; a0: number; a1: number }
   | { t: 'crusher'; id: string; p: V3; s: V3; rise?: number; period?: number; offset?: number }
   | { t: 'hammer'; id: string; p: V3; len?: number; yaw: number; period?: number; offset?: number }

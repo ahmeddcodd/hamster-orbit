@@ -4,7 +4,7 @@ import { Hazard } from './Hazard';
 import { MovingPlatform, RotatingPlatform, TiltingPlatform } from './platforms';
 import { Bumper, FanField, LaunchRamp, SpeedBooster } from './kinetic';
 import { Crusher, FlickerBridge, SawBlade, SwingingHammer } from './timing';
-import { BreakableGlass, EnemyBall, LoopField, MagnetWall, TransportTube } from './special';
+import { BreakableGlass, EnemyBall, MagnetWall, TransportTube } from './special';
 
 export function buildHazard(def: HazardDef, ctx: HazardContext): Hazard {
   switch (def.t) {
@@ -30,8 +30,6 @@ export function buildHazard(def: HazardDef, ctx: HazardContext): Hazard {
       return new TransportTube(def.id, ctx, def.points, def.r, def.speed);
     case 'glass':
       return new BreakableGlass(def.id, ctx, def.p, def.s, def.breakSpeed);
-    case 'loop':
-      return new LoopField(def.id, ctx, def.c, def.r, def.w, def.yaw);
     case 'magnetwall':
       return new MagnetWall(def.id, ctx, def.c, def.r, def.h, def.a0, def.a1);
     case 'crusher':

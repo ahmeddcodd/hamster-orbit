@@ -5,3 +5,5 @@ dist/
 coverage/
 # YouTube Playable upload package (build artifact)
 *.zip
+# unrelated sibling project that lives in this folder — not part of this repo
+lexiforge/

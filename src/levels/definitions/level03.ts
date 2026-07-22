@@ -48,22 +48,23 @@ export const level03: LevelDefinition = {
     // recovery platform below + ramp back up to the lane
     // (covers the full launch flight path so short launches are never lethal)
     plat(0, -70.5, 13, 17, -3.2),
-    // recovery ramp offset east so it never runs under the upper-route ramp
-    rampZ(5, -77.8, -83.2, 3.5, -3.2, -1),
-    // ramp guard rails + funnel back onto the bumper lane
-    rail(6.7, -3.2, -77.8, 6.7, -1, -83.2, 0.8),
-    rail(6.7, -1, -83.2, 4.8, -1, -86.2, 0.8),
-    rail(3.3, -3.2, -77.8, 3.3, -1.6, -81.2, 0.8),
+    // recovery ramp: offset east so it never runs under the upper-route ramp, and it
+    // must top out at the lane's height (-1) exactly where the lane begins (z -80.5),
+    // otherwise the ball drives into the lane's side face instead of rolling onto it
+    rampZ(5, -76, -80.6, 4, -3.2, -1),
+    // ramp side guards, stopping short of the lane so they never pinch the merge
+    rail(7.1, -3.2, -76, 7.1, -1.2, -80.4, 0.8),
+    rail(2.9, -3.2, -76, 2.9, -1.2, -80.4, 0.8),
     // guard the recovery platform's far edge: the ramp is the only way out
-    rail(-6.5, -3.2, -78.9, 3.2, -3.2, -78.9, 1.0),
+    rail(-6.5, -3.2, -78.9, 2.9, -3.2, -78.9, 1.0),
     rail(-6.5, -3.2, -62.2, -6.5, -3.2, -78.9, 0.8),
     rail(6.5, -3.2, -62.2, 6.5, -3.2, -77.5, 0.8),
     // upper route descends to the bumper lane
     rampZ(0, -74.8, -80.2, 6, 0.2, -1),
-    // alternating bumper lane
-    plat(0, -87, 10, 13, -1),
-    rail(-5, -1, -80.8, -5, -1, -93.4),
-    rail(5, -1, -80.8, 5, -1, -93.4),
+    // alternating bumper lane — wide enough to catch the recovery ramp's exit (x up to 6.75)
+    plat(0.5, -87, 15, 13, -1),
+    rail(-6.9, -1, -80.8, -6.9, -1, -93.4),
+    rail(7.9, -1, -80.8, 7.9, -1, -93.4),
     // finish pad (deep, so hot bumper-lane exits still land on it)
     plat(0, -100, 12, 16, -1),
   ],
