@@ -4,14 +4,20 @@
     {
       "name": "dev",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 5173
+      "runtimeArgs": ["run", "dev", "--", "--port", "5190", "--strictPort"],
+      "port": 5190
     },
     {
       "name": "preview",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "preview", "--", "--port", "4188"],
       "port": 4188
+    },
+    {
+      "name": "lexiforge",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "lexiforge", "run", "dev"],
+      "port": 5175
     }
   ]
 }
