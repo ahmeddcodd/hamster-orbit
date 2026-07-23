@@ -20,6 +20,8 @@ export class AudioManager {
   private rollFilter: BiquadFilterNode | null = null;
   private noiseBuffer: AudioBuffer | null = null;
   private music: MusicPlayer | null = null;
+  /** what the music *should* be playing, so a platform pause can restore it */
+  private currentProfile: MusicProfile | null = null;
   private unlocked = false;
 
   /** Call from a user-gesture handler; safe to call repeatedly. */
@@ -48,6 +50,8 @@ export class AudioManager {
       this.music = new MusicPlayer(this.ctx, this.musicGain);
       this.applyGains();
       this.startRollLoop();
+      // a track requested before the first gesture unlocked audio still starts
+      if (this.currentProfile) this.music.play(this.currentProfile);
     }
     if (this.ctx.state === 'suspended') {
       void this.ctx.resume().catch(() => undefined);
@@ -75,22 +79,39 @@ export class AudioManager {
   }
 
   /** Platform pause: hard-suspend the context (silence + zero CPU). */
+  /**
+   * Platform pause. The music generator is a scheduler, so stopping it clears the
+   * track — `currentProfile` is deliberately kept so resume() can rebuild it.
+   */
   suspend(): void {
     this.music?.stop();
     void this.ctx?.suspend().catch(() => undefined);
   }
 
   resume(): void {
-    if (this.unlocked && this.ctx?.state === 'suspended') {
-      void this.ctx.resume().catch(() => undefined);
+    if (!this.unlocked || !this.ctx) return;
+    // Restart the music generator: suspend() tore its scheduler down, and resuming
+    // the AudioContext alone only brings back one-shot SFX, leaving the game silent.
+    const restartMusic = (): void => {
+      if (this.currentProfile) this.music?.play(this.currentProfile);
+    };
+    if (this.ctx.state === 'suspended') {
+      void this.ctx
+        .resume()
+        .then(restartMusic)
+        .catch(() => undefined);
+    } else {
+      restartMusic();
     }
   }
 
   playMusic(profile: MusicProfile): void {
+    this.currentProfile = profile;
     this.music?.play(profile);
   }
 
   stopMusic(): void {
+    this.currentProfile = null;
     this.music?.stop();
   }
 
