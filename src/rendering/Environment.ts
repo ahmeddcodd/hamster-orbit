@@ -41,6 +41,9 @@ export class Environment {
   private skylineGeo: THREE.BoxGeometry | null = null;
   private skylineMat: THREE.MeshLambertMaterial | null = null;
   private static pmremTexture: THREE.Texture | null = null;
+  /** background skyline sits this far below the player, and no closer than this laterally */
+  private static readonly SKYLINE_DROP = 30;
+  private static readonly SKYLINE_MIN_DIST = 130;
   private readonly sunTargetOffset = new THREE.Vector3(14, 26, 10);
 
   constructor(
@@ -104,7 +107,18 @@ export class Environment {
     this.buildSkyline(palette);
   }
 
-  /** Distant floating low-poly towers — one instanced draw call. */
+  /**
+   * Distant low-poly skyline — one instanced draw call.
+   *
+   * These are pure background and must NEVER occlude the course. Two rules make
+   * that guaranteed rather than incidental:
+   *  1) every tower's TOP sits at local y = 0 or below, and the whole group is
+   *     parked SKYLINE_DROP below the player, so nothing can reach play height;
+   *  2) the group follows the player (see follow()), so a course of any length
+   *     can never drive into the ring. Previously the ring was static around the
+   *     origin at radius 90-220, and courses running to z=-214 (and the endless
+   *     Sprint) drove straight through it, putting towers in front of the path.
+   */
   private buildSkyline(palette: Palette): void {
     this.disposeSkyline();
     const count = 34;
@@ -117,10 +131,13 @@ export class Environment {
     const s = new THREE.Vector3();
     const p = new THREE.Vector3();
     for (let i = 0; i < count; i++) {
-      const angle = rng() * Math.PI * 2;
-      const dist = 90 + rng() * 130;
-      p.set(Math.cos(angle) * dist, -35 + rng() * 55, Math.sin(angle) * dist);
-      s.set(6 + rng() * 14, 20 + rng() * 60, 6 + rng() * 14);
+      const angle = (i / count) * Math.PI * 2 + rng() * 0.4;
+      const dist = Environment.SKYLINE_MIN_DIST + rng() * 120;
+      const height = 30 + rng() * 80;
+      // top of the tower hangs at local y in [-45, 0] => always below the group origin
+      const topLocal = -rng() * 45;
+      p.set(Math.cos(angle) * dist, topLocal - height / 2, Math.sin(angle) * dist);
+      s.set(6 + rng() * 14, height, 6 + rng() * 14);
       q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), rng() * Math.PI);
       m.compose(p, q, s);
       this.skyline.setMatrixAt(i, m);
@@ -131,11 +148,13 @@ export class Environment {
     this.scene.add(this.skyline);
   }
 
-  /** Keep the shadow frustum + sky dome centred on the action. */
+  /** Keep the shadow frustum, sky dome and background skyline centred on the action. */
   follow(target: THREE.Vector3): void {
     this.sun.position.copy(target).add(this.sunTargetOffset);
     this.sun.target.position.copy(target);
     this.skyDome.position.copy(target);
+    // background scenery rides with the player and stays well below the course
+    if (this.skyline) this.skyline.position.set(target.x, target.y - Environment.SKYLINE_DROP, target.z);
   }
 
   setShadowMapSize(size: number): void {

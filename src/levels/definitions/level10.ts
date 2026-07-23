@@ -27,8 +27,8 @@ export const level10: LevelDefinition = {
     cp('cp1', 0, -34, YAW_NEG_Z, -0.5, 8),
     cp('cp2', 0, -78.5, YAW_NEG_Z, -0.5, 10),
     cp('cp3', 0, -120, YAW_NEG_Z, -5.5, 9),
-    cp('cp4', -24, -148, YAW_NEG_Z, -5.5, 7),
-    cp('cp5', -24, -162.5, YAW_NEG_Z, -5.5, 8),
+    cp('cp4', -24.5, -152, YAW_NEG_Z, -5.5, 7),
+    cp('cp5', -24, -163, YAW_NEG_Z, -5.5, 8),
   ],
   seeds: [seed(0, -30, 0.4), seed(3.5, -72, -0.5), seed(-24, -159.5, -5.5)],
   geometry: [
@@ -62,8 +62,10 @@ export const level10: LevelDefinition = {
     rampZ(-22.5, -142.8, -148.5, 7, -7.7, -5.5),
     // west catch fence: wall dropouts funnel onto the ramp instead of the void
     rail(-27.6, -7.7, -138.5, -27.6, -6, -149, 1.4),
-    plat(-24.5, -148, 9, 9, -5.5),
-    plat(-24, -156.5, 6, 9, -5.5),
+    // starts where the ramp tops out (z -148.5). Any nearer and the ramp runs UNDER
+    // this deck, and the ball wedges against its side face instead of climbing on.
+    plat(-24.5, -153, 9, 9, -5.5),
+    plat(-24, -158.5, 6, 11, -5.5),
     plat(-24, -162, 8, 6, -5.5),
     // ---- ACT E: hammer, crusher gate, shuttle, mega launch, finish island
     plat(-24, -167, 7, 8, -5.5),
