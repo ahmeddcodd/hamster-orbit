@@ -698,13 +698,3 @@ input:focus-visible {
   }
 }
 
-/* reduced motion */
-body.reduced-motion .countdown-num,
-body.reduced-motion .hud-banner.show,
-body.reduced-motion .level-card.highlight,
-body.reduced-motion .hud-timer.urgent {
-  animation: none !important;
-}
-body.reduced-motion .floating-text.animate {
-  animation-duration: 0.6s;
-}

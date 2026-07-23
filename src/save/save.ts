@@ -17,7 +17,6 @@ export interface SaveSettings {
   musicVolume: number;
   effectsVolume: number;
   cameraShake: boolean;
-  reducedMotion: boolean;
   quality: 'auto' | 'low' | 'medium' | 'high';
 }
 
@@ -55,7 +54,7 @@ export function defaultSave(): SaveData {
     submittedScore: 0,
     levels,
     cosmetics: { goldRimUnlocked: false, selectedRim: 'classic' },
-    settings: { musicVolume: 0.8, effectsVolume: 0.9, cameraShake: true, reducedMotion: false, quality: 'auto' },
+    settings: { musicVolume: 0.8, effectsVolume: 0.9, cameraShake: true, quality: 'auto' },
   };
 }
 
@@ -156,7 +155,6 @@ export function migrateSave(r: Record<string, unknown>): SaveData {
       musicVolume: asFloat(s.musicVolume, base.settings.musicVolume, 0, 1),
       effectsVolume: asFloat(s.effectsVolume, base.settings.effectsVolume, 0, 1),
       cameraShake: asBool(s.cameraShake, true),
-      reducedMotion: asBool(s.reducedMotion, false),
       quality:
         s.quality === 'low' || s.quality === 'medium' || s.quality === 'high' || s.quality === 'auto'
           ? s.quality

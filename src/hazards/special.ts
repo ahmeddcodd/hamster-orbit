@@ -269,7 +269,9 @@ export class MagnetWall extends Hazard {
     const segs = Math.max(6, Math.ceil((Math.abs(a1 - a0) / TAU) * 26));
     for (let i = 0; i < segs; i++) {
       const a = a0 + ((i + 0.5) / segs) * (a1 - a0);
-      const segLen = ((Math.abs(a1 - a0) * r) / segs) * 1.12;
+      // collider overlaps to avoid physics seams; visual butts together to avoid z-fighting
+      const arcLen = (Math.abs(a1 - a0) * r) / segs;
+      const segLen = arcLen * 1.12;
       const px = center.x + Math.cos(a) * r;
       const pz = center.z + Math.sin(a) * r;
       const col = new BoxCollider(`${id}-seg${i}`).setBox(px, center.y + h / 2, pz, segLen, h, 0.5);
@@ -279,7 +281,7 @@ export class MagnetWall extends Hazard {
       col.setQuat(new THREE.Quaternion().setFromRotationMatrix(m));
       ctx.world.add(col);
       this.colliders.push(col);
-      const segGeo = new THREE.BoxGeometry(segLen, h, 0.5);
+      const segGeo = new THREE.BoxGeometry(arcLen, h, 0.5);
       const segMesh = new THREE.Mesh(segGeo, ctx.mats.checkerTop);
       segMesh.position.set(px, center.y + h / 2, pz);
       segMesh.quaternion.copy(col.quat);

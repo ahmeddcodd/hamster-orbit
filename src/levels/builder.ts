@@ -140,9 +140,7 @@ export function buildLevel(
   const g = rt.group;
 
   // ---- static geometry
-  for (const piece of def.geometry) {
-    buildGeoPiece(piece, rt, world, mats);
-  }
+  def.geometry.forEach((piece, i) => buildGeoPiece(piece, rt, world, mats, i));
 
   // ---- route arrows
   for (const a of def.arrows) {
@@ -271,7 +269,13 @@ export function buildLevel(
   return rt;
 }
 
-function buildGeoPiece(piece: GeoPiece, rt: LevelRuntime, world: PhysicsWorld, mats: MaterialLibrary): void {
+function buildGeoPiece(
+  piece: GeoPiece,
+  rt: LevelRuntime,
+  world: PhysicsWorld,
+  mats: MaterialLibrary,
+  index = 0
+): void {
   const g = rt.group;
   switch (piece.t) {
     case 'box': {
@@ -286,6 +290,12 @@ function buildGeoPiece(piece: GeoPiece, rt: LevelRuntime, world: PhysicsWorld, m
         mesh = platformMesh(piece.s[0], piece.s[1], piece.s[2], mats, piece.checker ?? true);
       }
       mesh.position.set(...piece.p);
+      // Courses deliberately overlap platforms to close seams. Two coplanar tops at an
+      // identical depth z-fight (shimmer), so stagger the VISUAL by a sub-millimetre
+      // amount — imperceptible, and colliders are untouched so physics is unchanged.
+      // Monotonic in index so two pieces can never land on the same offset (a hash or
+      // modulo can collide). ~0.3mm per piece stays far below anything perceptible.
+      mesh.position.y += index * 0.0003;
       const col = new BoxCollider('geo').setBox(...piece.p, ...piece.s);
       col.surface = surface;
       applyRot(col, mesh, piece.rotY ?? 0, piece.tilt ?? 0, piece.tiltAxis ?? 'x');
@@ -299,7 +309,11 @@ function buildGeoPiece(piece: GeoPiece, rt: LevelRuntime, world: PhysicsWorld, m
       const surface = piece.surface ?? Surface.NORMAL;
       for (let i = 0; i < segs; i++) {
         const a = piece.a0 + ((i + 0.5) / segs) * (piece.a1 - piece.a0);
-        const segLen = ((Math.abs(piece.a1 - piece.a0) * piece.r) / segs) * 1.14;
+        // Colliders overlap so the physics surface has no seams, but the VISUAL
+        // segments must butt together: overlapping coplanar faces z-fight (shimmer).
+        const arcLen = (Math.abs(piece.a1 - piece.a0) * piece.r) / segs;
+        const segLen = arcLen * 1.14;
+        const visSegLen = arcLen;
         const px = piece.c[0] + Math.cos(a) * piece.r;
         const pz = piece.c[2] + Math.sin(a) * piece.r;
         // c[1] is the walkable surface height (matches the plat() convention)
@@ -308,8 +322,8 @@ function buildGeoPiece(piece: GeoPiece, rt: LevelRuntime, world: PhysicsWorld, m
         // segment length runs along the tangent, track width w spans radially
         const mesh =
           surface === Surface.GLASS
-            ? new THREE.Mesh(new THREE.BoxGeometry(segLen, thick, piece.w), mats.glass)
-            : platformMesh(segLen, thick, piece.w, mats);
+            ? new THREE.Mesh(new THREE.BoxGeometry(visSegLen, thick, piece.w), mats.glass)
+            : platformMesh(visSegLen, thick, piece.w, mats);
         const col = new BoxCollider('geo-curve').setBox(px, cy, pz, segLen, thick, piece.w);
         col.surface = surface;
         const e = new THREE.Euler(0, -a + Math.PI / 2, piece.bank ?? 0, 'YXZ');

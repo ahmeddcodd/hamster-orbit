@@ -317,9 +317,6 @@ export class Game {
     this.save.data.settings = { ...s };
     this.audio.setVolumes(s.musicVolume, s.effectsVolume);
     this.followCam.shakeEnabled = s.cameraShake;
-    this.followCam.reducedMotion = s.reducedMotion;
-    this.postfx.setReducedMotion(s.reducedMotion);
-    document.body.classList.toggle('reduced-motion', s.reducedMotion);
     this.rendererMgr.setQualitySetting(s.quality);
     this.env.setShadowMapSize(this.rendererMgr.preset.shadowMapSize);
     this.particles.cap = this.rendererMgr.preset.particleCap;

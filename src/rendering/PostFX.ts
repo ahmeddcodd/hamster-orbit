@@ -65,10 +65,6 @@ export class PostFX {
     this.composer.setSize(w, h);
   }
 
-  setReducedMotion(reduced: boolean): void {
-    this.grade.uniforms.uVignette.value = reduced ? 0.18 : 0.32;
-  }
-
   render(): void {
     if (this.enabled) {
       this.composer.render();

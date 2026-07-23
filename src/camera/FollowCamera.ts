@@ -15,7 +15,6 @@ export class FollowCamera {
   readonly camera: THREE.PerspectiveCamera;
   yaw = 0;
   shakeEnabled = true;
-  reducedMotion = false;
   occluders: THREE.Object3D[] = [];
   private smoothedPos = new THREE.Vector3();
   private smoothedLook = new THREE.Vector3();
@@ -25,7 +24,10 @@ export class FollowCamera {
   private portrait = false;
 
   constructor() {
-    this.camera = new THREE.PerspectiveCamera(CAMERA_CFG.FOV_BASE, 1, 0.1, 600);
+    // near=0.5 (not 0.1) gives ~5x better depth-buffer precision across the course,
+    // which keeps large coplanar platform surfaces from z-fighting at distance.
+    // The follow rig never gets closer than a few units to the ball, so nothing clips.
+    this.camera = new THREE.PerspectiveCamera(CAMERA_CFG.FOV_BASE, 1, 0.5, 600);
   }
 
   setAspect(w: number, h: number): void {
@@ -35,7 +37,7 @@ export class FollowCamera {
   }
 
   addTrauma(amount: number): void {
-    if (!this.shakeEnabled || this.reducedMotion) return;
+    if (!this.shakeEnabled) return;
     this.trauma = Math.min(1, this.trauma + amount);
   }
 

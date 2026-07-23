@@ -12,7 +12,8 @@ type FlickerState = 'solid' | 'warning' | 'inactive' | 'restoring';
  */
 export class FlickerBridge extends Hazard {
   private mesh: THREE.Mesh;
-  private edge: THREE.Mesh;
+  private frame: THREE.Group;
+  private frameMat: THREE.MeshStandardMaterial;
   private collider: BoxCollider;
   private state: FlickerState = 'solid';
   private warned = false;
@@ -34,10 +35,32 @@ export class FlickerBridge extends Hazard {
       c.transparent = true;
       return c;
     });
-    // glowing edge frame reads at any color-vision profile
-    this.edge = boxMesh(s[0] + 0.08, s[1] * 0.4, s[2] + 0.08, ctx.mats.accentEmissive.clone());
-    this.edge.position.set(p[0], p[1] + s[1] * 0.35, p[2]);
-    ctx.group.add(this.mesh, this.edge);
+    // Glowing rim frame (4 thin bars, NOT a solid cover) so the checkered deck
+    // stays visible and the bridge's real state can always be read. A full-footprint
+    // slab here would look like solid ground even while collision is disabled.
+    this.frameMat = ctx.mats.accentEmissive.clone();
+    this.frameMat.transparent = true;
+    this.frame = new THREE.Group();
+    const barH = 0.22;
+    const barT = 0.16;
+    const topY = p[1] + s[1] / 2;
+    // side bars are inset so they butt against the end bars instead of overlapping at
+    // the corners (overlapping coplanar corners would z-fight)
+    const bars: Array<[number, number, number, number, number, number]> = [
+      // [sx, sy, sz, x, y, z]
+      [s[0] + barT, barH, barT, p[0], topY, p[2] + s[2] / 2],
+      [s[0] + barT, barH, barT, p[0], topY, p[2] - s[2] / 2],
+      [barT, barH, s[2] - barT, p[0] + s[0] / 2, topY, p[2]],
+      [barT, barH, s[2] - barT, p[0] - s[0] / 2, topY, p[2]],
+    ];
+    for (const [sx, sy, sz, x, y, z] of bars) {
+      const bar = boxMesh(sx, sy, sz, this.frameMat);
+      bar.position.set(x, y, z);
+      bar.castShadow = false;
+      bar.receiveShadow = false;
+      this.frame.add(bar);
+    }
+    ctx.group.add(this.mesh, this.frame);
     this.collider = new BoxCollider(`${id}-body`).setBox(p[0], p[1], p[2], s[0], s[1], s[2]);
     ctx.world.add(this.collider);
   }
@@ -55,7 +78,6 @@ export class FlickerBridge extends Hazard {
     const prev = this.state;
     this.state = state;
     const mats = this.mesh.material as THREE.Material[];
-    const edgeMat = this.edge.material as THREE.MeshStandardMaterial;
 
     let opacity = 1;
     let edgeIntensity = 0.5;
@@ -92,10 +114,13 @@ export class FlickerBridge extends Hazard {
       }
     }
     for (const m of mats) m.opacity = opacity;
-    (this.edge.material as THREE.Material as THREE.MeshStandardMaterial).opacity = 1;
-    edgeMat.emissiveIntensity = edgeIntensity;
+    // The rim tracks the deck's own opacity: when the bridge is intangible the
+    // frame must fade out too, otherwise it reads as solid ground and the player
+    // rolls onto a disabled collider and falls through.
+    this.frameMat.opacity = opacity;
+    this.frameMat.emissiveIntensity = edgeIntensity;
     this.mesh.visible = opacity > 0.03;
-    this.edge.visible = true;
+    this.frame.visible = opacity > 0.03;
   }
 
   override reset(): void {
@@ -106,7 +131,7 @@ export class FlickerBridge extends Hazard {
   override dispose(): void {
     this.ctx.world.remove(this.collider);
     for (const m of this.mesh.material as THREE.Material[]) m.dispose();
-    (this.edge.material as THREE.Material).dispose();
+    this.frameMat.dispose();
   }
 }
 

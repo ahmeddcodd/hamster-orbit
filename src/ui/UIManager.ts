@@ -280,14 +280,6 @@ export class UIManager {
           <label>${t('cameraShake')}</label>
           <button class="toggle-btn ${s.cameraShake ? 'on' : ''}" id="set-shake">${s.cameraShake ? 'ON' : 'OFF'}</button>
         </div>
-        <div class="setting-row">
-          <label>${t('reducedMotion')}</label>
-          <button class="toggle-btn ${s.reducedMotion ? 'on' : ''}" id="set-motion">${s.reducedMotion ? 'ON' : 'OFF'}</button>
-        </div>
-        <div class="setting-row">
-          <label>${t('quality')}</label>
-          <button class="quality-btn" id="set-quality">${t('quality' + s.quality[0].toUpperCase() + s.quality.slice(1))}</button>
-        </div>
         <button class="btn danger" id="set-reset">${t('resetProgress')}</button>
         <button class="btn subtle" id="set-back">${t('back')}</button>
       </div>
@@ -307,22 +299,6 @@ export class UIManager {
       current.cameraShake = !current.cameraShake;
       shakeBtn.classList.toggle('on', current.cameraShake);
       shakeBtn.textContent = current.cameraShake ? 'ON' : 'OFF';
-      this.cb.onUiSound('click');
-      emit();
-    });
-    const motionBtn = el.querySelector<HTMLButtonElement>('#set-motion')!;
-    motionBtn.addEventListener('click', () => {
-      current.reducedMotion = !current.reducedMotion;
-      motionBtn.classList.toggle('on', current.reducedMotion);
-      motionBtn.textContent = current.reducedMotion ? 'ON' : 'OFF';
-      this.cb.onUiSound('click');
-      emit();
-    });
-    const qualityBtn = el.querySelector<HTMLButtonElement>('#set-quality')!;
-    qualityBtn.addEventListener('click', () => {
-      const order: SaveSettings['quality'][] = ['auto', 'low', 'medium', 'high'];
-      current.quality = order[(order.indexOf(current.quality) + 1) % order.length];
-      qualityBtn.textContent = t('quality' + current.quality[0].toUpperCase() + current.quality.slice(1));
       this.cb.onUiSound('click');
       emit();
     });
