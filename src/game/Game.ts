@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { PHYSICS, PRODUCT, RESPAWN_CFG, SCORE_CFG, TIMING } from '../config/config';
+import { GOAL_CFG, PHYSICS, PRODUCT, RESPAWN_CFG, SCORE_CFG, TIMING } from '../config/config';
 import { GameState, StateMachine } from '../app/StateMachine';
 import { PlayablesBridge } from '../platform/PlayablesBridge';
 import { SaveCoordinator } from '../save/SaveCoordinator';
@@ -418,7 +418,6 @@ export class Game {
       {
         onCheckpoint: (i) => this.onCheckpoint(i),
         onSeed: (i) => this.onSeed(i),
-        onGoal: () => this.onGoal(),
         onShortcut: (id) => this.onShortcut(id),
         onTutorial: (text) => this.onTutorial(text),
       }
@@ -616,6 +615,25 @@ export class Game {
     if (this.run.shownTutorials.has(text)) return;
     this.run.shownTutorials.add(text);
     this.hud.tutorial(text);
+  }
+
+  /**
+   * The level is only complete when the ball actually lands on the flag circle:
+   * its centre must be inside the pad radius AND it must be at pad height. Flying
+   * over the pad is therefore a miss — the ball carries on, falls, and respawns at
+   * the last checkpoint like any other fall.
+   */
+  private checkGoalReached(): void {
+    if (!this.level || this.states.current !== GameState.PLAYING) return;
+    const goal = this.level.def.goal;
+    const radius = (goal.r ?? 2.2) + GOAL_CFG.RADIUS_SLACK;
+    const dx = this.player.pos.x - goal.p[0];
+    const dz = this.player.pos.z - goal.p[2];
+    if (dx * dx + dz * dz > radius * radius) return;
+    // resting height of a ball sitting on the finish pad
+    const restY = goal.p[1] + this.player.radius;
+    if (Math.abs(this.player.pos.y - restY) > GOAL_CFG.CONTACT_HEIGHT) return;
+    this.onGoal();
   }
 
   private onGoal(): void {
@@ -951,7 +969,9 @@ export class Game {
           this.failLevel();
           return;
         }
-        // void fall
+        // finish: only counts as a landing on the flag circle
+        this.checkGoalReached();
+        // void fall (includes overshooting the finish circle)
         if (this.player.pos.y < def.fallY) this.killPlayer('void');
       }
     }

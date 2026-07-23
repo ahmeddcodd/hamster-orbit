@@ -73,6 +73,17 @@ export const SCORE_CFG = {
   PER_100MS_REMAINING: 4,
 } as const;
 
+export const GOAL_CFG = {
+  /**
+   * The finish only counts when the ball actually lands on the flag circle.
+   * Its centre must be inside the pad radius, and it must be at pad height —
+   * sailing over the top is a miss, so an overshoot falls and costs a respawn.
+   */
+  CONTACT_HEIGHT: 1.1,
+  /** extra pad radius allowed, so grazing the rim still reads as "on the circle" */
+  RADIUS_SLACK: 0.25,
+} as const;
+
 export const TIMING = {
   COUNTDOWN_STEP: 0.62,
   RESULT_DELAY: 0.9,

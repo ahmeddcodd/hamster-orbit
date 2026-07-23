@@ -11,7 +11,6 @@ import type { GeoPiece, LevelDefinition } from './types';
 export interface BuilderCallbacks {
   onCheckpoint: (index: number) => void;
   onSeed: (index: number) => void;
-  onGoal: () => void;
   onShortcut: (id: string) => void;
   onTutorial: (text: string) => void;
 }
@@ -229,16 +228,9 @@ export function buildLevel(
   );
   g.add(goal);
   rt.goalGroup = goal;
-  // tall trigger so fast or airborne finishes still count — no perfect centering required
-  const goalVol = new BoxCollider('goal').setBox(
-    def.goal.p[0],
-    def.goal.p[1] + 2.2,
-    def.goal.p[2],
-    (def.goal.r ?? 2.2) * 1.9,
-    5.6,
-    (def.goal.r ?? 2.2) * 1.9
-  );
-  world.addTrigger({ id: 'goal', enabled: true, volume: goalVol, inside: false, onEnter: () => cb.onGoal() });
+  // No goal trigger volume here: the finish must be an actual landing on the flag
+  // circle, which is a radial + height test done per frame in Game.checkGoalReached().
+  // An edge-triggered box would also latch `inside` on a near miss and never re-fire.
 
   // ---- shortcut score gates
   for (const s of def.shortcuts ?? []) {
