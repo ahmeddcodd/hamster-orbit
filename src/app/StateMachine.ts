@@ -86,6 +86,8 @@ export class StateMachine {
   private state: GameState = GameState.BOOT;
   private prePlatformPause: GameState = GameState.TITLE;
   private listeners: Array<(next: GameState, prev: GameState) => void> = [];
+  /** only resumePlatformPause() may unlatch PLATFORM_PAUSE */
+  private platformExitAllowed = false;
 
   get current(): GameState {
     return this.state;
@@ -103,8 +105,27 @@ export class StateMachine {
     return TRANSITIONS[this.state]?.includes(to) ?? false;
   }
 
+  /**
+   * Leave PLATFORM_PAUSE. This is the ONLY way out: while YouTube has the game
+   * paused, no other code path (a stray UI click, a keypress) may change state.
+   */
+  resumePlatformPause(to: GameState): boolean {
+    if (this.state !== GameState.PLATFORM_PAUSE) return false;
+    this.platformExitAllowed = true;
+    const ok = this.transition(to);
+    this.platformExitAllowed = false;
+    return ok;
+  }
+
   transition(to: GameState): boolean {
     if (to === this.state) return false;
+    // Hard gate: the platform owns the pause. Nothing escapes it except a real resume.
+    if (this.state === GameState.PLATFORM_PAUSE && !this.platformExitAllowed) {
+      if (DEBUG.logStateTransitions) {
+        console.warn(`[StateMachine] blocked ${this.state} -> ${to} (platform holds the pause)`);
+      }
+      return false;
+    }
     // ERROR is reachable from every state (fatal failures can happen anywhere)
     if (to !== GameState.ERROR && !this.canTransition(to)) {
       if (DEBUG.logStateTransitions) {

@@ -688,6 +688,17 @@ input:focus-visible {
   align-items: center;
 }
 
+/* ============ platform (YouTube) pause ============
+   While the platform holds the pause, nothing in the game may be interactive.
+   The global `button { pointer-events: auto }` rule would otherwise keep every
+   overlay button (results, settings, pause, try again) and the HUD pause button
+   clickable, so this must override all of them. */
+body.platform-paused #ui-root,
+body.platform-paused #ui-root *,
+body.platform-paused #game-canvas {
+  pointer-events: none !important;
+}
+
 /* very small screens: trim decorative text */
 @media (max-width: 360px) {
   .meta-line {

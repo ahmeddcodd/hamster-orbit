@@ -137,14 +137,19 @@ export class Game {
       onQuitToLevelSelect: () => this.quitToLevelSelect(),
       onNextLevel: () => this.startLevel(Math.min(this.levelNumber + 1, LEVEL_COUNT)),
       onReplay: () => this.restartCurrent(),
-      onSettingsChanged: (s) => this.applySettings(s, true),
+      onSettingsChanged: (s) => {
+        if (this.platformPaused) return;
+        this.applySettings(s, true);
+      },
       onResetProgress: () => {
+        if (this.platformPaused) return;
         this.save.resetProgress();
         this.applySettings(this.save.data.settings, false);
         this.goToTitle();
       },
       onErrorRetry: () => window.location.reload(),
       onUiSound: (kind) => {
+        if (this.platformPaused) return;
         this.audio.unlock();
         if (kind === 'click') this.audio.uiClick();
         else if (kind === 'back') this.audio.uiBack();
@@ -155,6 +160,7 @@ export class Game {
     this.wireInput();
     this.wirePlayerEvents();
     this.wirePlatform();
+    this.installPlatformPauseGuard(uiRoot);
     if (import.meta.env.DEV) {
       (window as unknown as Record<string, unknown>).__game = this; // dev QA handle
     }
@@ -233,10 +239,14 @@ export class Game {
   // ------------------------------------------------------------------ wiring
 
   private wireInput(): void {
+    // Every keyboard entry point below listens on window, so the UI-root capture
+    // guard cannot see it — each must refuse to act while the platform is paused.
     this.input.onAnyKey = () => {
+      if (this.platformPaused) return; // never wake audio while YouTube has it paused
       if (this.bridge.isAudioEnabled()) this.audio.unlock();
     };
     this.input.onPauseRequest = () => {
+      if (this.platformPaused) return;
       if (this.ui.dialogOpen) {
         this.ui.closeDialog();
         return;
@@ -248,10 +258,12 @@ export class Game {
       else if (s === GameState.LEVEL_SELECT) this.goToTitle();
     };
     this.input.onRestartRequest = () => {
+      if (this.platformPaused) return;
       const s = this.states.current;
       if (s === GameState.PLAYING || s === GameState.RESPAWNING || s === GameState.MANUAL_PAUSE) this.restartCurrent();
     };
     this.hud.onPause = () => {
+      if (this.platformPaused) return;
       const s = this.states.current;
       if (s === GameState.PLAYING || s === GameState.COUNTDOWN || s === GameState.RESPAWNING) this.pauseGame();
     };
@@ -283,7 +295,8 @@ export class Game {
   private wirePlatform(): void {
     this.bridge.subscribeAudioEnabledChange((enabled) => {
       this.audio.setPlatformEnabled(enabled);
-      if (enabled) this.audio.unlock();
+      // unmuting must not restart the context while the platform also has us paused
+      if (enabled && !this.platformPaused) this.audio.unlock();
     });
     this.bridge.subscribePause(() => this.onPlatformPause());
     this.bridge.subscribeResume(() => this.onPlatformResume());
@@ -292,9 +305,14 @@ export class Game {
   private onPlatformPause(): void {
     if (this.states.current === GameState.PLATFORM_PAUSE) return;
     this.states.transition(GameState.PLATFORM_PAUSE);
+    this.input.setEnabled(false);
     this.input.clearActive();
     this.audio.suspend();
     this.save.flush();
+    // Freeze the whole UI: while YouTube holds the pause the player must not be
+    // able to click ANYTHING — not the HUD pause button, and not a results,
+    // settings, pause or try-again overlay that happened to be open.
+    this.setUiFrozen(true);
   }
 
   private onPlatformResume(): void {
@@ -304,11 +322,41 @@ export class Game {
     const prior = this.states.stateBeforePlatformPause;
     if (prior === GameState.PLAYING || prior === GameState.COUNTDOWN || prior === GameState.RESPAWNING) {
       // never auto-resume gameplay: land on the manual pause menu
-      this.states.transition(GameState.MANUAL_PAUSE);
+      this.states.resumePlatformPause(GameState.MANUAL_PAUSE);
       this.ui.show('pause');
     } else {
-      this.states.transition(prior);
+      this.states.resumePlatformPause(prior);
     }
+    this.setUiFrozen(false);
+    if (this.states.gameplayInputAllowed) this.input.setEnabled(true);
+  }
+
+  /** Platform pause owns all interaction: kill pointer events across the whole UI. */
+  private setUiFrozen(frozen: boolean): void {
+    document.body.classList.toggle('platform-paused', frozen);
+  }
+
+  /**
+   * Capture-phase net over the whole UI. `pointer-events: none` stops mouse and
+   * touch, but a button that already has focus can still be fired with Enter or
+   * Space — so swallow those too, before any handler on the button can run.
+   */
+  private installPlatformPauseGuard(uiRoot: HTMLElement): void {
+    const swallow = (e: Event): void => {
+      if (!this.platformPaused) return;
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    };
+    // `input`/`change` are included so focused range sliders and toggles cannot be
+    // nudged either — pointer-events alone does not cover keyboard-driven changes.
+    for (const type of ['click', 'pointerdown', 'pointerup', 'keydown', 'keyup', 'input', 'change'] as const) {
+      uiRoot.addEventListener(type, swallow, true);
+    }
+  }
+
+  /** True while YouTube holds the pause — every user entry point must bail out. */
+  private get platformPaused(): boolean {
+    return this.states.current === GameState.PLATFORM_PAUSE;
   }
 
   // -------------------------------------------------------------- settings
