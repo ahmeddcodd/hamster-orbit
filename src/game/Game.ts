@@ -328,7 +328,9 @@ export class Game {
       this.states.resumePlatformPause(prior);
     }
     this.setUiFrozen(false);
-    if (this.states.gameplayInputAllowed) this.input.setEnabled(true);
+    // Input stays off here on purpose: we always land on a menu (the pause overlay
+    // or whatever was open). beginRun() and resumeFromPause() re-enable it when
+    // gameplay actually resumes.
   }
 
   /** Platform pause owns all interaction: kill pointer events across the whole UI. */
@@ -907,6 +909,9 @@ export class Game {
     if (this.states.transition(target)) {
       this.ui.hideAll();
       this.hud.setVisible(true);
+      // A platform pause switches the input layer off; returning to play has to
+      // switch it back on or the ball stays dead after Resume.
+      this.input.setEnabled(true);
     }
   }
 
